@@ -1,0 +1,95 @@
+If qfilterString IsNot Nothing Then
+
+
+                'offsetString = qfilterString.ToOffsetString()
+                whereClause = qfilterString.ToWhereString()
+                selectString = qfilterString.GetColumnNames()
+                sortString = qfilterString.GetSort()
+
+
+                If (whereClause.Length > 0) Then whereClause = "WHERE " & whereClause
+
+                'offsetString = " ORDER BY ID " + sortString + " " + qfilterString.ToOffsetString()
+                'offsetString = " ORDER BY ID_ScheduleAssignment desc"
+                offsetString = " ORDER BY PRIO"
+
+            End If
+
+            sql = String.Format("SELECT TOP 1 * FROM (
+                                        SELECT 
+                                            tscheddet.id,
+                                            tscheddet.id_employee,
+                                            tscheddet.code,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(tsched.mon_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(tsched.tue_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(tsched.wed_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(tsched.thu_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Friday' THEN Isnull(tsched.fri_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Saturday' THEN Isnull(tsched.sat_timeout,NULL)
+                                                    ELSE Isnull(tsched.sun_timeout,NULL)
+                                            END AS currtimeout,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(tsched.mon_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(tsched.tue_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(tsched.wed_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(tsched.thu_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS  DATE)) = 'Friday' THEN Isnull(tsched.fri_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS  DATE)) = 'Saturday' THEN Isnull(tsched.sat_name_schedule,NULL)
+                                                    ELSE Isnull(tsched.sun_name_schedule,NULL)
+                                            END AS name_schedule,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(tsched.mon_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(tsched.tue_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(tsched.wed_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(tsched.thu_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Friday' THEN Isnull(tsched.fri_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Saturday' THEN Isnull(tsched.sat_id_schedule,NULL)
+                                                    ELSE Isnull(tsched.sun_id_schedule,NULL)
+                                            END AS id_schedule
+	                                        ,1 AS PRIO
+                                        FROM       tscheduleassignment_detail tschedDet
+		                                        LEFT JOIN tscheduleassignment tsched
+		                                        ON        tsched.id = tscheddet.id_scheduleassignment
+                 
+		                                        {1}
+		                                        AND  Cast('{0}' AS DATE) BETWEEN Cast(tsched.dateeffectivity AS DATE) AND  Cast(tsched.dateto AS DATE) 
+
+                                        UNION ALL
+
+                                        SELECT 
+                                            temprec.id,
+                                            temprec.id_employee,
+                                            temprec.code,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(temprec.mon_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(temprec.tue_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(temprec.wed_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(temprec.thu_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Friday' THEN Isnull(temprec.fri_timeout,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Saturday' THEN Isnull(temprec.sat_timeout,NULL)
+                                                    ELSE Isnull(temprec.sun_timeout,NULL)
+                                            END AS currtimeout,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(temprec.mon_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(temprec.tue_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(temprec.wed_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(temprec.thu_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS  DATE)) = 'Friday' THEN Isnull(temprec.fri_name_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS  DATE)) = 'Saturday' THEN Isnull(temprec.sat_name_schedule,NULL)
+                                                    ELSE Isnull(temprec.sun_name_schedule,NULL)
+                                            END AS name_schedule,
+                                            CASE
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Monday' THEN Isnull(temprec.mon_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Tuesday' THEN Isnull(temprec.tue_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Wednesday' THEN Isnull(temprec.wed_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Thursday' THEN Isnull(temprec.thu_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Friday' THEN Isnull(temprec.fri_id_schedule,NULL)
+                                                    WHEN Datename(weekday,Cast('{0}' AS DATE)) = 'Saturday' THEN Isnull(temprec.sat_id_schedule,NULL)
+                                                    ELSE Isnull(temprec.sun_id_schedule,NULL)
+                                            END AS id_schedule
+	                                        ,2 AS PRIO
+                                        FROM      temploymentrecord tempRec
+
+                                        {1} ) AS SCHED
+                                       {2}", selectedColumn, whereClause, offsetString)
